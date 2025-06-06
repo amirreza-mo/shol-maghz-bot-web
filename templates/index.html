@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>چت‌بات هوش مصنوعی شما</title>
+    <style>
+        body {
+            font-family: 'B Nazanin', Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #E0F2F7; /* آبی ملایم */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+            direction: rtl;
+            text-align: right;
+            font-size: 16px;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 80vh; /* ارتفاع چت‌باکس */
+        }
+
+        .chat-header {
+            background-color: #1976D2; /* آبی تیره */
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto; /* برای اسکرول پیام‌ها */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            line-height: 1.6;
+            word-wrap: break-word; /* برای شکستن کلمات طولانی */
+        }
+
+        .message.user {
+            background-color: #DCF8C6; /* سبز روشن برای پیام کاربر */
+            align-self: flex-end; /* پیام کاربر در سمت راست */
+            border-bottom-left-radius: 2px;
+        }
+
+        .message.bot {
+            background-color: #E0E0E0; /* خاکستری روشن برای پیام ربات */
+            align-self: flex-start; /* پیام ربات در سمت چپ */
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background-color: #f9f9f9;
+        }
+
+        .chat-input input[type="text"] {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            margin-left: 10px; /* برای فاصله از دکمه */
+            font-family: 'B Nazanin', Tahoma, sans-serif; /* فونت برای کادر ورودی */
+        }
+
+        .chat-input button {
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-family: 'B Nazanin', Tahoma, sans-serif; /* فونت برای دکمه */
+        }
+
+        .chat-input button:hover {
+            background-color: #005f7a;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            شل مغز آماده صحبت با شماست
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot">سلام! من ربات هوش مصنوعی شما هستم. چطور می‌تونم کمکتون کنم؟</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="پیام خود را بنویسید..." autocomplete="off">
+            <button id="send-button">ارسال</button>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        const userId = 'web_user_1';
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === '') return;
+
+            addMessage(message, 'user');
+            userInput.value = '';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message, user_id: userId })
+                });
+
+                const data = await response.json();
+                addMessage(data.response, 'bot');
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addMessage('متاسفانه مشکلی در ارتباط با ربات پیش آمده. لطفا دوباره تلاش کنید.', 'bot');
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+
+        userInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
